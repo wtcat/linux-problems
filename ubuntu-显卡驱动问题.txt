@@ -1,0 +1,16 @@
+ubuntu显卡驱动问题导致不能正常开机的解决方式：
+
+
+1. 进入启动菜单按e进入启动命令编辑， 在splash后面加上nouveau.modeset=0
+2. 禁止内核加载自带的nvdia驱动， 在/etc/modprobe.d/blacklist.conf 加入:
+   blacklist nouveau
+   options nouveau modeset=0
+
+3. 编辑/etc/default/grub, 更改启动命令， 然后执行update-grub
+4. 卸载已安装的显卡驱动: sudo apt-get --purge remove nvidia*
+5. 安装NVIDIA显卡驱动：sudo ubuntu-drivers autoinstall
+
+
+
+
+
