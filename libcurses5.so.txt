@@ -1,0 +1,4 @@
+问题：找不到共享库libcurses.so.5
+
+sudo add-apt-repository universe
+sudo apt-get install libncurses5 libncurses5:i386

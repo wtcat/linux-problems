@@ -1,0 +1,4 @@
+问题： 找不到共享库libpython[3.8 or 2.7 ...].so.**
+
+
+sudo apt install libpython[3.8 or 2.7 ...]
