@@ -1,3 +1,15 @@
+  
+  Install insight:
+  
+  git clone --recursive git://sourceware.org/git/insight.git
+  
+Depends on:
+  sudo apt-get install autoconf automake autogen \
+	texinfo zlib1g-dev tcl-dev tk-dev \
+	mesa-common-dev libjpeg-dev libtogl-dev \
+	python2.7-dev flex bison itcl3 itk3 iwidgets4
+	
+	
   这里我们编译用于嵌入式的所以需要添加选项–target=arm-none-eabi，
 而–prefix=/opt/arm-none-eabi-insight/.是编译安装后存放的位置。
   我在编译时发现如果不配置–prefix可以编译成功，而配置之后总是报错，
@@ -5,22 +17,8 @@
 即选项–with-tcl=/usr/lib/ --with-tk=/usr/lib/
 
 autoconf
-./configure --prefix=/opt/arm-none-eabi-insight/. 
-            --target=arm-none-eabi 
-			--disable-binutils 
-			--disable-elfcpp 
-			--disable-gas 
-			--disable-gold 
-			--disable-gprof 
-			--disable-ld 
-			--disable-rpath 
-			--disable-zlib 
-			--enable-sim 
-			--with-expat 
-			--with-python 
-			--without-libunwind 
-			--with-tcl=/usr/lib/ 
-			--with-tk=/usr/lib/
+./configure --prefix=/home/wt/Insight_zephyr --target=arm-zephyr-eabi --disable-binutils --disable-elfcpp --disable-gas --disable-gold --disable-gprof --disable-ld --disable-rpath --disable-zlib --enable-sim --with-expat --with-python=/usr/bin/python2.7 --without-libunwind --with-tcl=/usr/lib/ --with-tk=/usr/lib/ --disable-werror
+
 make
 sudo make install
 
