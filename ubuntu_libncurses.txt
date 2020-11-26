@@ -1,0 +1,3 @@
+ubuntu 安装 ncurses:
+
+  sudo apt-get install libncurses5-dev
