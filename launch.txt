@@ -1,0 +1,73 @@
+
+//Cross_GDB + QEMU
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "gdbtest",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/arm-rtems6-realview_pbx_a9_qemu/smp.elf",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath":"/opt/development/rtems/6/bin/arm-rtems6-gdb",
+            "miDebuggerServerAddress":"127.0.0.1:1234"
+        }
+    ]
+
+
+//Cross-GDB + Jlink
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(gdb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/project_wkpace/build/zephyr/zephyr.elf",
+            "miDebuggerPath":"/home/wt/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "console": "externalTerminal",
+            "MIMode": "gdb",
+            "targetArchitecture": "arm",
+            
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },{
+                    "text": "file '${workspaceFolder}/project_wkpace/build/zephyr/zephyr.elf'"
+                },{
+                    "text": "target remote localhost:2331"
+                },{
+                    "text": "monitor reset"
+                },{
+                    "text": "monitor halt"
+                },{
+                    "text": "load"
+                }
+            ]
+        }
+    ]
+}
