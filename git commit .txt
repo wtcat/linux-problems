@@ -1,1 +1,20 @@
-git config --global core.editor "vim"
+假定文件根目录为：BOM_Dir
+
+1> 打开Git-bash 命令窗口, 通过cd命令进入BOM_Dir
+2> 输入"git init" 初始化本地仓库
+3> 输入"git add --all" 跟踪当前仓库下的所有文件， 也可以 "git add <filename or directory>" 添加单个文件或目录
+4> 输入"git commit -m "First commit""提交到本地仓库
+5> 输入"git remote add origin https://github.com/xxxxxx/test.git", 添加远程仓库地址
+6> 输入"git push -u origin master"， 推送到远程仓库。
+
+
+初次安装Git需要设置用户明和邮箱：
+	
+git config --global user.name  "your user name"
+git config --global user.email "your user email"
+
+
+
+
+设置默认编辑器(可选)：
+git config --global core.editor vim
