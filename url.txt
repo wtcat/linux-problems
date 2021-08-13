@@ -1,2 +1,5 @@
 Linux kernel:
   https://zhuanlan.zhihu.com/p/108425561  (TLB)
+  
+GNU x86 assemble
+  https://blog.csdn.net/pro_technician/article/details/78173777
