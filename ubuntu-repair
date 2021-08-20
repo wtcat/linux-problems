@@ -1,0 +1,5 @@
+用装有ubuntu系统的引导U盘启动电脑，然后操作如下
+# sudo su
+# sudo add-apt-repository ppa:yannubuntu/boot-repair
+# sudo apt-get update
+# sudo apt-get install boot-repair
