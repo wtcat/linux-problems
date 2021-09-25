@@ -1,0 +1,18 @@
+WSL关闭windows 环境变量:
+1> vim /etc/wsl.conf
+[interop]
+enabled=false
+appendWindowsPath=false
+
+2> 以管理员运行powershell
+net stop LxssManager
+net start LxssManager
+
+
+设置WSL资源限制(windows 用户目录下创建.wslconfig)
+[wsl2]
+memory=4GB
+swap=0
+localhostForwarding=true
+processors=4
+
