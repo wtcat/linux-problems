@@ -1,0 +1,2 @@
+1> 安装XZ 压缩工具
+  sudo apt install xz-utils
