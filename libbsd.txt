@@ -1,0 +1,5 @@
+1> ftpd 传输文件需要配置ftp连接数大于等于2， (命令 和 数据分开)
+2> rtems block-cache 预读取机制开机后会降低磁盘持续写入速率
+3> sysctl 命令用于查看或修改内核参数
+   sysctl -a                     --查看所有内核参数
+   sysctl -f /etc/sysctl.conf    --导入/etc/sysctl.conf文件中的内核配置 
