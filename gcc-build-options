@@ -1,0 +1,4 @@
+-funwind-tables
+-fno-omit-frame-pointer 
+-fverbose-asm
+-fcallgraph-info=
