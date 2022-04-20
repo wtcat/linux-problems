@@ -1,4 +1,6 @@
 -funwind-tables
+-mpoke-function-name
+
 -fno-omit-frame-pointer 
 -fverbose-asm
 -fcallgraph-info=
