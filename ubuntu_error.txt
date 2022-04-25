@@ -1,0 +1,33 @@
+在 Ubuntu 执行 sudo apt-get upgrade 或sudo apt-get install 时，出现了如下的报错：
+
+dpkg: error processing package ***
+
+subprocess installed post-installation script returned error exit status 127
+
+这主要是由于不完全安装导致的。解决方式是删除或编辑安装信息文件。
+
+粗暴方法一：删除所有信息之后update
+sudo mv /var/lib/dpkg/info/ /var/lib/dpkg/info_old/
+sudo mkdir /var/lib/dpkg/info/
+sudo apt-get update
+
+执行完以上代码后再用sudo apt-get install 安装
+
+
+
+精细方法二：查看出错信息，定向删除或编辑
+
+出错信息subprocess installed post-installation script returned error exit status 127中
+
+可以看到这里的提示post-installation的问题，那么需要编辑该文件，具体在
+
+/var/lib/dpkg/info/[package_name].postinst
+
+同理，还有可能出问题的是"pre-removal" or "post-removal" 对应后缀 .prerm or .postrm
+
+此时删除问题文件或编辑注释掉所有或问题内容即可。例如
+sudo rm /var/lib/dpkg/info/[package_name].postinst
+# 或更狠一点，全删
+# sudo rm /var/lib/dpkg/info/[package_name].*
+sudo dpkg --configure -a
+sudo apt-get update
