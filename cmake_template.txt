@@ -1,0 +1,111 @@
+#=========================
+# CMake 通用封装函数
+#=========================
+
+function(include_dirs)
+	foreach(arg ${ARGV})
+		if(IS_ABSOLUTE ${arg})
+			set(path ${arg})
+		else()
+			set(path ${CMAKE_CURRENT_SOURCE_DIR}/${arg})
+		endif()
+		target_include_directories(common_interface INTERFACE ${path})
+	endforeach()
+endfunction()
+
+function(library_link libname item)
+  target_link_libraries(${libname} PUBLIC ${item} ${ARGN})
+endfunction()
+
+# Static library
+macro(static_library name)
+	add_library(${name} STATIC "")
+	set_property(GLOBAL APPEND PROPERTY common_libs ${name})
+	target_link_libraries(${name} PUBLIC common_interface)
+endmacro()
+
+# Shared library
+macro(shared_library name)
+	add_library(${name} SHARED "")
+	set_property(GLOBAL APPEND PROPERTY common_libs ${name})
+	target_link_libraries(${name} PUBLIC common_interface)
+endmacro()
+
+# Link target
+macro(collect_link_libraries name target_name )
+	get_property(_libs GLOBAL PROPERTY common_libs)
+	foreach(item ${_libs})
+	  add_dependencies(${target_name} ${item})
+	  message(STATUS "-> ${item}")
+	endforeach()
+	set(${name} ${_libs})
+endmacro()
+
+# Common interface library
+add_library(common_interface INTERFACE )
+
+function(compile_options)
+  target_compile_options(common_interface INTERFACE ${ARGV})
+endfunction()
+
+function(add_subdirectory_ifdef feature_toggle)
+  if(${${feature_toggle}})
+    add_subdirectory(${ARGN})
+  endif()
+endfunction()
+
+function(add_subdirectory_ifndef feature_toggle)
+  if(${${feature_toggle}})
+    add_subdirectory(${ARGN})
+  endif()
+endfunction()
+
+function(add_subdirectory_ifndef feature_toggle source_dir)
+  if(NOT ${feature_toggle})
+    add_subdirectory(${source_dir} ${ARGN})
+  endif()
+endfunction()
+
+#=========================
+# CMake 交叉编译工具链设置
+#=========================
+set(CMAKE_C_COMPILER   "${RTEMS_TOOLCHAIN_PREFIX}-gcc")
+set(CMAKE_CXX_COMPILER "${RTEMS_TOOLCHAIN_PREFIX}-g++")
+set(CMAKE_ASM_COMPILER "${RTEMS_TOOLCHAIN_PREFIX}-as")
+set(CMAKE_LINKER	"${RTEMS_TOOLCHAIN_PREFIX}-ld")
+set(CMAKE_OBJCOPY      "${RTEMS_TOOLCHAIN_PREFIX}-objcopy" CACHE INTERNAL "objcopy tool")
+set(CMAKE_OBJDUMP      "${RTEMS_TOOLCHAIN_PREFIX}-objdump" CACHE INTERNAL "objdump tool")
+set(CMAKE_SIZE         "${RTEMS_TOOLCHAIN_PREFIX}-size" CACHE INTERNAL "size tool")
+set(CMAKE_DEBUGER      "${RTEMS_TOOLCHAIN_PREFIX}-gdb" CACHE INTERNAL "debuger")
+set(CMAKE_CPPFILT      "${RTEMS_TOOLCHAIN_PREFIX}-c++filt" CACHE INTERNAL "C++filt")
+
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+
+
+# this makes the test compiles use static library option so that we don't need to pre-set linker flags and scripts
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+
+set(OPTIMIZE_FLAGS ${CONFIG_OPTIMAIZE_OPTION})
+set(SPEC_FLAGS      "-pipe -B${RTEMS_ROOT_DIR} -specs bsp_specs -qrtems")
+set(RTEMS_CPP_FLAGS "-Wall -Wimplicit-function-declaration -Wstrict-prototypes -fdata-sections -ffunction-sections")
+set(AUTOCONF_FLAGS  "-imacros ${AUTOCONF_H}")
+set(CMAKE_C_FLAGS   "${MCPU_FLAGS} ${VFP_FLAGS} ${SPEC_FLAGS} ${AUTOCONF_FLAGS} ${RTEMS_CPP_FLAGS} ${OPTIMIZE_FLAGS} ${RTEMS_CFLAGS}" CACHE INTERNAL "c compiler flags")
+set(CMAKE_CXX_FLAGS "${MCPU_FLAGS} ${VFP_FLAGS} ${SPEC_FLAGS} ${AUTOCONF_FLAGS} ${RTEMS_CPP_FLAGS} ${OPTIMIZE_FLAGS} ${RTEMS_CCFLAGS} -fno-rtti -fno-exceptions" CACHE INTERNAL "cxx compiler flags")
+set(CMAKE_ASM_FLAGS "${MCPU_FLAGS} -x assembler-with-cpp" CACHE INTERNAL "asm compiler flags")
+set(CMAKE_EXE_LINKER_FLAGS "${MCPU_FLAGS} -Wl,--gc-sections -Wl,-Map=${EXECUTABLE_OUTPUT_PATH}/map" CACHE INTERNAL "exe link flags")
+
+
+#===========================================
+# CMake 静态库 动态库 可执行文件生成路径指定
+#===========================================
+CMAKE_ARCHIVE_OUTPUT_DIRECTORY：默认存放静态库的文件夹位置
+CMAKE_LIBRARY_OUTPUT_DIRECTORY：默认存放动态库的文件夹位置
+LIBRARY_OUTPUT_PATH：默认存放库文件的位置，如果产生的是静态库并且没有指定 CMAKE_ARCHIVE_OUTPUT_DIRECTORY 则存放在该目录下，动态库也类似
+CMAKE_RUNTIME_OUTPUT_DIRECTORY：存放可执行软件的目录
+
+
+
+
