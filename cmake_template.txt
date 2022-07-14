@@ -116,3 +116,97 @@ set(CMAKE_CXX_COMPILER_WORKS TRUE)
 # CMake 生成compile_commands.json
 #===========================================
 CMAKE_EXPORT_COMPILE_COMMANDS = 1
+
+#===========================================
+# CMake 项目模板
+#===========================================
+cmake_minimum_required(VERSION 3.8)
+project(template)
+enable_language(C CXX)
+
+option(CONFIG_XXXXX          "Enable XXXX framework" ON)
+include (${PROJECT_SOURCE_DIR}/cmake/extensions.cmake)
+
+if (POLICY CMP0076)
+    cmake_policy(SET CMP0076 NEW)
+endif(POLICY CMP0076)
+
+#
+# Select operation system
+#
+message(STATUS "OS Platform: ${CMAKE_SYSTEM_NAME}")
+if (CMAKE_HOST_WIN32)
+    enable_language(RC)
+    set(WINDOWS TRUE)
+    add_compile_options(/wd4819)
+elseif (CMAKE_HOST_APPLE)
+    set(MACOS TRUE)
+elseif (CMAKE_HOST_UNIX)
+    set(LINUX TRUE)
+else ()
+  message(FATAL_ERROR "Unknown operation system")
+endif ()
+
+#
+# Find depend package
+#
+set(SOURCE_FILES empty.c)
+set(EXTRA_LIBS )
+if (LINUX)
+    include(FindPkgConfig)
+    pkg_search_module(SDL2 REQUIRED sdl2)
+    include_directories(
+        ${SDL2_INCLUDE_DIR}
+    )
+  add_definitions(-include config.h)
+  add_compile_options(-m32)
+  list(APPEND EXTRA_LIBS pthread m)
+ # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -m elf_i386")
+elseif (WINDOWS)
+#    set(PREINCLUDE /FI"config.h")
+#    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${PREINCLUDE}")
+#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PREINCLUDE}")
+    add_compile_options(/utf-8)
+endif()
+
+#=========================
+# Global compile options
+#=========================
+include_directories(
+  ${PROJECT_SOURCE_DIR}
+)
+
+set(CMAKE_C_STANDARD   11)
+set(CMAKE_CXX_STANDARD 17)
+
+# Generate executable file
+if (CONFIG_UNIT_TEST)
+    set(TARGET_NAME gtest_main)
+else()
+    set(TARGET_NAME ${PROJECT_NAME})
+endif()
+
+add_executable(${TARGET_NAME} ${SOURCE_FILES})
+
+# Add subdirectories
+add_subdirectory(app)
+
+#
+# Link target
+#
+collect_link_libraries(libs ${TARGET_NAME})
+if (LINUX)
+  target_link_libraries(${TARGET_NAME} 
+    -Wl,--start-group
+    ${libs}
+    -Wl,--end-group
+    ${SDL2_LIBRARIES}
+    ${EXTRA_LIBS}
+  )
+else()
+  target_link_libraries(${TARGET_NAME} 
+    ${libs}
+    ${SDL2_LIBRARIES}
+    ${EXTRA_LIBS}
+  )
+endif()
