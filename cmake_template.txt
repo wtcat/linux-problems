@@ -106,6 +106,13 @@ CMAKE_LIBRARY_OUTPUT_DIRECTORY：默认存放动态库的文件夹位置
 LIBRARY_OUTPUT_PATH：默认存放库文件的位置，如果产生的是静态库并且没有指定 CMAKE_ARCHIVE_OUTPUT_DIRECTORY 则存放在该目录下，动态库也类似
 CMAKE_RUNTIME_OUTPUT_DIRECTORY：存放可执行软件的目录
 
+#===========================================
+# CMake 跳过C CXX编译器检查
+#===========================================
+set(CMAKE_C_COMPILER_WORKS   TRUE)
+set(CMAKE_CXX_COMPILER_WORKS TRUE)
 
-
-
+#===========================================
+# CMake 生成compile_commands.json
+#===========================================
+CMAKE_EXPORT_COMPILE_COMMANDS = 1
