@@ -1,0 +1,163 @@
+cmake_minimum_required(VERSION 3.8)
+project(doui-sim)
+enable_language(C CXX)
+
+#====================
+# Configure options
+#====================
+option(CONFIG_DOUI          "Enable DOUI framework" ON)
+option(CONFIG_DOUI_PC       "Enable DOUI PC-Version" ON)
+option(CONFIG_SDL           "Use sdl library simulate GUI" ON)
+option(CONFIG_DOUI_MEMINFO  "Enable DOUI memory debug" ON)
+option(CONFIG_TIMER_WKQUEUE "Timer callback execute with run-queue" ON)
+option(CONFIG_UNIT_TEST     "Enable uint test for module" OFF)
+option(CONFIG_TIMER_EXT     "Enable user timer extension"  OFF)
+option(CONFIG_BUILD_MULTI_LANGUAGE_EXT "Build multi-language" ON)
+option(CONFIG_DX_DEBUG      "Enable debug for GUI frame" ON)
+option(CONFIG_ASSERT_ON     "Enable assert for debug" ON)
+option(CONFIG_DOUI_TEXT_RECORDER  "Enable text recoreder for doui" OFF)
+option(CONFIG_CUSTOM_WF_WIDGET    "Enable user custom watchface widget" OFF)
+
+#Log
+option(SPDLOG_COMPILED_LIB  "Enable spdlog library" ON)
+option(SPDLOG_SHARED_LIB    "Build spdlib as shared library" OFF)
+option(spdlog_EXPORTS       "Export spdlib symbols" ON)
+
+#Tools
+option(CONFIG_TOOLS_DIAL_COMPILER  "Build watch-face file compile tools" OFF)
+option(CONFIG_TOOLS_FONT_FINDER    "Build font fine tool" OFF)
+
+
+
+include (${PROJECT_SOURCE_DIR}/config.cmake)
+include (${PROJECT_SOURCE_DIR}/cmake/extensions.cmake)
+
+if (POLICY CMP0076)
+    cmake_policy(SET CMP0076 NEW)
+endif(POLICY CMP0076)
+message(STATUS "CONFIG_UNIT_TEST = ${CONFIG_UNIT_TEST}")
+
+#=========================
+# Select operation system
+#=========================
+message(STATUS "OS Platform: ${CMAKE_SYSTEM_NAME}")
+if (CMAKE_HOST_WIN32)
+    enable_language(RC)
+    set(WINDOWS TRUE)
+    add_compile_options(/wd4819)
+    add_compile_options(/wd4996)
+    add_compile_options(/wd5105)
+    add_compile_options(/wd4129)
+    add_compile_options(/wd4200)
+elseif (CMAKE_HOST_APPLE)
+    set(MACOS TRUE)
+elseif (CMAKE_HOST_UNIX)
+    set(LINUX TRUE)
+else ()
+  message(FATAL_ERROR "Unknown operation system")
+endif ()
+
+#=====================
+# Find depend package
+#=====================
+set(SOURCE_FILES empty.c)
+set(EXTRA_LIBS )
+if (LINUX)
+    include(FindPkgConfig)
+    pkg_search_module(SDL2 REQUIRED sdl2)
+    include_directories(
+        ${SDL2_INCLUDE_DIR}
+    )
+  add_definitions(-include config.h)
+  add_compile_options(-m32)
+  list(APPEND EXTRA_LIBS pthread m)
+ # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -m elf_i386")
+elseif (WINDOWS)
+    set(SDL_PATH sdl/SDL2/lib/x86)
+    link_directories(${SDL_PATH})
+    list(APPEND SDL2_LIBRARIES 
+        SDL2
+        SDL2main
+    )
+    if (NOT EXISTS ${PROJECT_BINARY_DIR}/SDL2.dll)
+        file(COPY ${SDL_PATH}/SDL2.dll 
+            DESTINATION ${PROJECT_BINARY_DIR})
+    endif()
+    set(PREINCLUDE /FI"config.h")
+    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${PREINCLUDE}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PREINCLUDE}")
+    add_compile_options(/utf-8)
+endif()
+
+#=========================
+# Global compile options
+#=========================
+include_directories(
+  ${PROJECT_SOURCE_DIR}
+)
+
+set(CMAKE_C_STANDARD   11)
+set(CMAKE_CXX_STANDARD 17)
+
+# Generate executable file
+if (CONFIG_UNIT_TEST)
+    set(TARGET_NAME gtest_main)
+else()
+    set(TARGET_NAME ${PROJECT_NAME})
+endif()
+
+
+add_executable(${TARGET_NAME} ${SOURCE_FILES})
+
+# Add subdirectories
+add_subdirectory(app)
+if (CONFIG_UNIT_TEST)
+    add_subdirectory(testsuite)
+endif()
+add_subdirectory(lib)
+add_subdirectory(adaptor)
+add_subdirectory(base)
+if (WIN32)
+  add_subdirectory(sdl)
+  add_subdirectory(res)
+endif()
+
+add_subdirectory(tools)
+
+#=================
+# Link target
+#=================
+collect_link_libraries(libs ${TARGET_NAME})
+if (LINUX)
+  target_link_libraries(${TARGET_NAME} 
+    -Wl,--start-group
+    ${libs}
+    -Wl,--end-group
+    ${SDL2_LIBRARIES}
+    ${EXTRA_LIBS}
+  )
+else()
+  target_link_libraries(${TARGET_NAME} 
+    ${libs}
+    ${SDL2_LIBRARIES}
+    ${EXTRA_LIBS}
+  )
+endif()
+
+#==========================
+# Generate configure file
+#==========================
+configure_file(${PROJECT_SOURCE_DIR}/config.h.in 
+               ${PROJECT_SOURCE_DIR}/config.h 
+               @ONLY)
+
+#================
+# Debug command
+#================
+if (LINUX)
+  set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+  add_custom_target(gdb 
+    COMMAND 
+    {CMAKE_DEBUGER} ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}
+  )
+endif()
